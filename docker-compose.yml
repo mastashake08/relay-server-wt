@@ -1,0 +1,38 @@
+services:
+  relay-server:
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    # Optional: Specify image name if you want to push it later
+    # image: my-aioquic-relay:latest
+    container_name: aioquic-relay-server
+
+    # Map the UDP port from the host to the container
+    # Format: HOST_PORT:CONTAINER_PORT/protocol
+    ports:
+      - "4433:4433/udp"
+
+    # Option 1: Use certificates copied into the image by Dockerfile (simpler)
+    # No volumes needed here if Dockerfile copies ssl_*.pem
+
+    # Option 2: Mount certificates from the host (more flexible)
+    # Uncomment the following lines and ensure ssl_cert.pem and ssl_key.pem
+    # exist in the same directory as docker-compose.yml or adjust path.
+    # Ensure the Dockerfile *does not* COPY the certs if using volumes.
+    # volumes:
+    #   - ./ssl_cert.pem:/app/ssl_cert.pem:ro
+    #   - ./ssl_key.pem:/app/ssl_key.pem:ro
+
+    # Restart policy (optional)
+    restart: unless-stopped
+
+    # Optional: Set resource limits
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '0.5'
+    #       memory: 128M
+
+networks:
+  default:
+    driver: bridge
+
