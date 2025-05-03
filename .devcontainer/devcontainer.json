@@ -1,0 +1,74 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "AIOQUIC Relay Server Dev",
+	// Use a standardized Python development container image.
+	// You can pin to a specific Python version like "3.11" if needed.
+	"image": "mcr.microsoft.com/devcontainers/python:0-3.11",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Forward the UDP port used by the AIOQUIC server.
+	"forwardPorts": [4433],
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// This is generally used for TCP ports. UDP forwarding might require specific host setup
+	// or using docker-compose networking depending on the OS and Docker version.
+	// For UDP testing, often running the client *inside* the container or on the host
+	// network (`"runArgs": ["--network=host"]` - use with caution) might be easier.
+	// However, explicitly listing it can help with documentation and potential future tooling.
+	"portsAttributes": {
+		"4433": {
+			"label": "AIOQUIC UDP",
+			"protocol": "udp", // Specify UDP protocol
+			"onAutoForward": "notify" // Notify when forwarded (may not auto-forward UDP well)
+		}
+	},
+
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "pip install --user -r requirements.txt",
+
+	// Use 'postStartCommand' to run commands after the container starts.
+	// Generate certs if they don't exist. Assumes generate_certs.sh is in the workspace root.
+	"postStartCommand": "if [ ! -f ssl_cert.pem ] || [ ! -f ssl_key.pem ]; then echo 'Certificates not found, generating...' && bash ./generate_certs.sh; else echo 'Certificates found.'; fi",
+
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true // Enable pytest if you add tests
+				// Add other Python-specific settings like linters, formatters
+				// "python.linting.pylintEnabled": true,
+				// "python.linting.enabled": true,
+				// "python.formatting.provider": "black"
+			},
+
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python", // Microsoft Python extension
+				"ms-python.vscode-pylance", // Language server
+				"ms-python.debugpy", // Python debugger
+				"njpwerner.autodocstring", // Auto-generate docstrings
+				"ms-azuretools.vscode-docker" // Docker extension (useful for managing containers)
+				// Add other useful extensions like linters (e.g., "ms-python.pylint"), formatters ("ms-python.black-formatter")
+			]
+		}
+	},
+
+	// Mount the project folder into the container.
+	"workspaceFolder": "/workspace",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+
+	// Optional: Add run arguments if needed, e.g., for host networking (use carefully)
+	// "runArgs": ["--network=host"]
+}
+
